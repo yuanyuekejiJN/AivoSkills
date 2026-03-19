@@ -1,0 +1,18 @@
+{
+  "name": "aivo-split-scene",
+  "version": "1.0.0",
+  "displayName": "按场景拆解",
+  "description": "调用容剪(AIVO)场景检测功能，自动检测视频中的场景切换点并拆分为多个片段。",
+  "author": "AIVO Team",
+  "emoji": "🎞️",
+  "category": "editing",
+  "requires": {
+    "bins": ["curl"],
+    "aivoMinVersion": "2.0.0",
+    "dependencies": []
+  },
+  "os": ["darwin", "linux", "win32"],
+  "changelog": {
+    "1.0.0": "初始版本，支持场景检测与拆分"
+  }
+}

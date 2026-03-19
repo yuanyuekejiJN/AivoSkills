@@ -1,0 +1,169 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2026-03-19T10:00:00Z",
+  "baseUrl": "https://github.com/yuanyuekejiJN/AivoSkills/releases/download",
+  "skills": [
+    {
+      "slug": "aivo-luban",
+      "name": "鲁班模式",
+      "version": "1.0.0",
+      "description": "调用容剪(AIVO)鲁班模式(ZGL)进行视频自动剪辑，批量生成多版本视频。",
+      "emoji": "🎬",
+      "category": "editing",
+      "requires": {
+        "bins": ["curl"],
+        "aivoMinVersion": "2.0.0"
+      },
+      "os": ["darwin", "linux", "win32"],
+      "downloadUrl": "https://github.com/yuanyuekejiJN/AivoSkills/releases/download/v1.0.0/aivo-luban-1.0.0.zip",
+      "sha256": "",
+      "size": 0,
+      "publishedAt": "2026-03-19T10:00:00Z",
+      "changelog": "初始版本，支持 ZGL 批量视频剪辑"
+    },
+    {
+      "slug": "aivo-nezha",
+      "name": "哪吒模式",
+      "version": "1.0.0",
+      "description": "调用容剪(AIVO)哪吒模式(SWK)进行多轨道矩阵剪辑。",
+      "emoji": "🦸",
+      "category": "editing",
+      "requires": {
+        "bins": ["curl"],
+        "aivoMinVersion": "2.0.0"
+      },
+      "os": ["darwin", "linux", "win32"],
+      "downloadUrl": "https://github.com/yuanyuekejiJN/AivoSkills/releases/download/v1.0.0/aivo-nezha-1.0.0.zip",
+      "sha256": "",
+      "size": 0,
+      "publishedAt": "2026-03-19T10:00:00Z",
+      "changelog": "初始版本，支持 SWK 多轨道矩阵剪辑"
+    },
+    {
+      "slug": "aivo-fast-filter",
+      "name": "极速过滤",
+      "version": "1.0.0",
+      "description": "调用容剪(AIVO)极速过滤功能，自动检测并删除视频中的静音片段。",
+      "emoji": "⚡",
+      "category": "editing",
+      "requires": {
+        "bins": ["curl"],
+        "aivoMinVersion": "2.0.0"
+      },
+      "os": ["darwin", "linux", "win32"],
+      "downloadUrl": "https://github.com/yuanyuekejiJN/AivoSkills/releases/download/v1.0.0/aivo-fast-filter-1.0.0.zip",
+      "sha256": "",
+      "size": 0,
+      "publishedAt": "2026-03-19T10:00:00Z",
+      "changelog": "初始版本，支持自动删除静音片段"
+    },
+    {
+      "slug": "aivo-split-scene",
+      "name": "按场景拆解",
+      "version": "1.0.0",
+      "description": "调用容剪(AIVO)场景检测功能，自动检测视频中的场景切换点并拆分为多个片段。",
+      "emoji": "🎞️",
+      "category": "editing",
+      "requires": {
+        "bins": ["curl"],
+        "aivoMinVersion": "2.0.0"
+      },
+      "os": ["darwin", "linux", "win32"],
+      "downloadUrl": "https://github.com/yuanyuekejiJN/AivoSkills/releases/download/v1.0.0/aivo-split-scene-1.0.0.zip",
+      "sha256": "",
+      "size": 0,
+      "publishedAt": "2026-03-19T10:00:00Z",
+      "changelog": "初始版本，支持场景检测与拆分"
+    },
+    {
+      "slug": "aivo-tts",
+      "name": "AI配音",
+      "version": "1.0.0",
+      "description": "调用容剪(AIVO)语音合成功能，将文本转换为语音音频，支持多种音色选择。",
+      "emoji": "🔊",
+      "category": "audio",
+      "requires": {
+        "bins": ["curl"],
+        "aivoMinVersion": "2.0.0"
+      },
+      "os": ["darwin", "linux", "win32"],
+      "downloadUrl": "https://github.com/yuanyuekejiJN/AivoSkills/releases/download/v1.0.0/aivo-tts-1.0.0.zip",
+      "sha256": "",
+      "size": 0,
+      "publishedAt": "2026-03-19T10:00:00Z",
+      "changelog": "初始版本，支持语音合成多音色"
+    },
+    {
+      "slug": "aivo-video-download",
+      "name": "视频下载",
+      "version": "1.0.0",
+      "description": "调用容剪(AIVO)视频下载功能，支持多平台视频解析与提取。",
+      "emoji": "📥",
+      "category": "download",
+      "requires": {
+        "bins": ["curl"],
+        "aivoMinVersion": "2.0.0"
+      },
+      "os": ["darwin", "linux", "win32"],
+      "downloadUrl": "https://github.com/yuanyuekejiJN/AivoSkills/releases/download/v1.0.0/aivo-video-download-1.0.0.zip",
+      "sha256": "",
+      "size": 0,
+      "publishedAt": "2026-03-19T10:00:00Z",
+      "changelog": "初始版本，支持多平台视频下载"
+    },
+    {
+      "slug": "aivo-download-split",
+      "name": "下载+场景拆解",
+      "version": "1.0.0",
+      "description": "调用容剪(AIVO)组合技能，先下载视频再自动按场景拆解。",
+      "emoji": "📥🎞️",
+      "category": "download",
+      "requires": {
+        "bins": ["curl"],
+        "aivoMinVersion": "2.0.0"
+      },
+      "os": ["darwin", "linux", "win32"],
+      "downloadUrl": "https://github.com/yuanyuekejiJN/AivoSkills/releases/download/v1.0.0/aivo-download-split-1.0.0.zip",
+      "sha256": "",
+      "size": 0,
+      "publishedAt": "2026-03-19T10:00:00Z",
+      "changelog": "初始版本，支持下载+场景拆解组合"
+    },
+    {
+      "slug": "aivo-download-extract",
+      "name": "下载+文案提取",
+      "version": "1.0.0",
+      "description": "调用容剪(AIVO)组合技能，先下载视频再通过ASR自动提取语音文案。",
+      "emoji": "📥📝",
+      "category": "download",
+      "requires": {
+        "bins": ["curl"],
+        "aivoMinVersion": "2.0.0"
+      },
+      "os": ["darwin", "linux", "win32"],
+      "downloadUrl": "https://github.com/yuanyuekejiJN/AivoSkills/releases/download/v1.0.0/aivo-download-extract-1.0.0.zip",
+      "sha256": "",
+      "size": 0,
+      "publishedAt": "2026-03-19T10:00:00Z",
+      "changelog": "初始版本，支持下载+ASR文案提取组合"
+    },
+    {
+      "slug": "aivo-copywriting-fission",
+      "name": "文案裂变",
+      "version": "1.0.0",
+      "description": "调用容剪(AIVO)文案裂变功能，将文案自动拆分为分镜并生成多个裂变版本。",
+      "emoji": "📝",
+      "category": "copywriting",
+      "requires": {
+        "bins": ["curl"],
+        "aivoMinVersion": "2.0.0"
+      },
+      "os": ["darwin", "linux", "win32"],
+      "downloadUrl": "https://github.com/yuanyuekejiJN/AivoSkills/releases/download/v1.0.0/aivo-copywriting-fission-1.0.0.zip",
+      "sha256": "",
+      "size": 0,
+      "publishedAt": "2026-03-19T10:00:00Z",
+      "changelog": "初始版本，支持文案裂变多版本生成"
+    }
+  ]
+}

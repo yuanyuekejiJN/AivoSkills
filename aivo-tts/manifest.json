@@ -1,0 +1,18 @@
+{
+  "name": "aivo-tts",
+  "version": "1.0.0",
+  "displayName": "AI配音",
+  "description": "调用容剪(AIVO)语音合成功能，将文本转换为语音音频，支持多种音色选择。",
+  "author": "AIVO Team",
+  "emoji": "🔊",
+  "category": "audio",
+  "requires": {
+    "bins": ["curl"],
+    "aivoMinVersion": "2.0.0",
+    "dependencies": []
+  },
+  "os": ["darwin", "linux", "win32"],
+  "changelog": {
+    "1.0.0": "初始版本，支持语音合成多音色"
+  }
+}

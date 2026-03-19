@@ -1,0 +1,18 @@
+{
+  "name": "aivo-download-split",
+  "version": "1.0.0",
+  "displayName": "下载+场景拆解",
+  "description": "调用容剪(AIVO)组合技能，先下载视频再自动按场景拆解，完整处理流程。",
+  "author": "AIVO Team",
+  "emoji": "📥🎞️",
+  "category": "download",
+  "requires": {
+    "bins": ["curl"],
+    "aivoMinVersion": "2.0.0",
+    "dependencies": []
+  },
+  "os": ["darwin", "linux", "win32"],
+  "changelog": {
+    "1.0.0": "初始版本，支持下载+场景拆解组合"
+  }
+}

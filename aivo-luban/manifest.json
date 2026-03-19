@@ -1,0 +1,18 @@
+{
+  "name": "aivo-luban",
+  "version": "1.0.0",
+  "displayName": "鲁班模式",
+  "description": "调用容剪(AIVO)鲁班模式(ZGL)进行视频自动剪辑，批量生成多版本视频。",
+  "author": "AIVO Team",
+  "emoji": "🎬",
+  "category": "editing",
+  "requires": {
+    "bins": ["curl"],
+    "aivoMinVersion": "2.0.0",
+    "dependencies": []
+  },
+  "os": ["darwin", "linux", "win32"],
+  "changelog": {
+    "1.0.0": "初始版本，支持 ZGL 批量视频剪辑"
+  }
+}

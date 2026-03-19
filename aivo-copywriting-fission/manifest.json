@@ -1,0 +1,18 @@
+{
+  "name": "aivo-copywriting-fission",
+  "version": "1.0.0",
+  "displayName": "文案裂变",
+  "description": "调用容剪(AIVO)文案裂变功能，将文案自动拆分为分镜并生成多个裂变版本。",
+  "author": "AIVO Team",
+  "emoji": "📝",
+  "category": "copywriting",
+  "requires": {
+    "bins": ["curl"],
+    "aivoMinVersion": "2.0.0",
+    "dependencies": []
+  },
+  "os": ["darwin", "linux", "win32"],
+  "changelog": {
+    "1.0.0": "初始版本，支持文案裂变多版本生成"
+  }
+}

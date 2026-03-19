@@ -1,0 +1,18 @@
+{
+  "name": "aivo-download-extract",
+  "version": "1.0.0",
+  "displayName": "下载+文案提取",
+  "description": "调用容剪(AIVO)组合技能，先下载视频再通过ASR自动提取语音文案。",
+  "author": "AIVO Team",
+  "emoji": "📥📝",
+  "category": "download",
+  "requires": {
+    "bins": ["curl"],
+    "aivoMinVersion": "2.0.0",
+    "dependencies": []
+  },
+  "os": ["darwin", "linux", "win32"],
+  "changelog": {
+    "1.0.0": "初始版本，支持下载+ASR文案提取组合"
+  }
+}
