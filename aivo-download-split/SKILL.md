@@ -105,11 +105,14 @@ curl -s -X POST http://localhost:7073/api/video-download \
 }
 ```
 
-保存 `data.download_url`（若返回字段为 `local_file_path`，从中提取 `/downloads/` 部分）。
+保存 `data.download_url`（服务端已自动补充，若万一为空则从 `local_file_path` 中提取 `/downloads/` 部分）。
+
+> **⚠️ 重要：Step 2 只是在远程服务器上下载完成，文件不在用户本地！必须执行 Step 2b 才能保存到本地。**
 
 ---
 
-### Step 2b — 下载视频到本地
+### Step 2b — 下载视频到本地（必须执行）
+
 
 ```bash
 curl -s -X POST http://localhost:7073/api/video-download/save-to-local \

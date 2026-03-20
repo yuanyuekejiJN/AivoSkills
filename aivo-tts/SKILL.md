@@ -22,14 +22,15 @@ metadata:
 
 # 语音合成 (TTS)
 
-> **严格约束（必须遵守）：**
-> 1. **只使用本文档中明确列出的 API 路径**，绝对不要猜测或构造文档中没有的 URL
+> 严格约束（必须遵守）：
+> 1. 只使用本文档中明确列出的 API 路径，绝对不要猜测或构造文档中没有的 URL
 > 2. 基础地址固定为 `http://localhost:7073`
-> 3. `/api/health` 返回 `{"status":"ok"}` 即代表服务可用，不要再告诉用户"服务不可用"
-> 4. **创建任务的 `shots` 数组中，文本字段名是 `content`（不是 `text`、不是 `items`）**
-> 5. **轮询状态返回的 `data.id` 是数字类型，用于 save-to-folder；`taskNo` 是字符串，用于轮询状态**
-> 6. **save-to-folder 的 `id` 参数必须是数字类型（如 `12345`），不是字符串**
-> 7. 不需要手动传 Authorization 头，Go 服务自动使用缓存的用户 token
+> 3. `/api/health` 返回 `{"status":"ok"}` 仅代表服务可用，不代表已登录
+> 4. 创建任务的 `shots` 数组中，文本字段名是 `content`（不是 `text`、不是 `items`）
+> 5. 轮询状态返回的 `data.id` 是数字类型，用于 save-to-folder；`taskNo` 是字符串，用于轮询状态
+> 6. save-to-folder 的 `id` 参数必须是数字类型（如 `12345`），不是字符串
+> 7. 除 `/api/health` 外，所有接口必须携带 `Authorization: Bearer <token>` 请求头。AIVO 内置的 AivoClaw 会自动从本地安全存储读取并附带；独立/上游 OpenClaw 不会自动附带，必须在启动它的同一终端设置 `AIVO_TOKEN` 环境变量，或在请求中显式传入该头；手动用 curl 排查也请自行加上该请求头。
+> 8. 如返回 401（未登录/无效 token），请执行“刷新登录状态”并重试；不要在对话中粘贴明文 token
 
 ## 接口一览（仅限使用这些路径）
 
@@ -51,21 +52,72 @@ metadata:
 
 ## 快速示例
 
-> **"用甜美女声帮我合成这段话：大家好，今天给大家推荐一款超好用的面膜"**
+> "用甜美女声帮我合成这段话：大家好，今天给大家推荐一款超好用的面膜"
 
-> **"导入 D:/fission_result.json 进行语音合成"**
+> "导入 D:/fission_result.json 进行语音合成"
+
+---
+
+## Token 获取与使用（重要）
+
+- 手动用 curl 调试时，需为除 `/api/health` 外的所有请求添加 `Authorization: Bearer <token>` 头。
+- 建议设置环境变量保存 token：
+  - macOS/Linux（临时会话）: `export AIVO_TOKEN="<your_token>"`
+  - Windows PowerShell（临时会话）: `$env:AIVO_TOKEN="<your_token>"`
+- token 来源：容剪客户端登录后缓存于本机。AIVO 内置的 AivoClaw 会自动读取并附带；独立/上游 OpenClaw 不会自动附带，需按下方指引配置。
+
+### 外置 OpenClaw（上游）使用指引（避免 401）
+
+1) 在启动 OpenClaw 的同一终端设置环境变量（让 Gateway 继承）
+   - Windows PowerShell: `$env:AIVO_TOKEN="<your_token>"`
+   - macOS/Linux: `export AIVO_TOKEN="<your_token>"`
+2) 先用 curl 验证登录态是否有效（应返回 `code: 200`）：
+   ```bash
+   curl -s http://localhost:7073/api/tts/voices/categories \
+     -H "Authorization: Bearer $AIVO_TOKEN"
+   ```
+3) 在同一终端里启动 OpenClaw。此后本技能的所有请求都会携带 `Authorization` 头。
+4) 若仍 401，请执行“Step 0 — 刷新登录状态”（完全退出 AIVO→重登→等 3–5 秒）后重试。
+
+---
+
+## Step 0 — 刷新登录状态（处理 401 必看）
+
+当你“已登录但仍报未登录/401”，通常是本地服务仍在使用旧 token。按以下顺序刷新登录状态：
+
+- 完全退出容剪客户端（不是最小化）：
+  - Windows：右下角托盘图标右键 → 退出；若窗口卡住，可在任务管理器结束进程后重开
+  - macOS：菜单栏或 Dock 退出；若卡住，在活动监视器结束进程后重开
+  - Linux：系统托盘退出；若卡住，关闭所有窗口后重开
+- 重新打开容剪并登录账号；登录成功后等待 3–5 秒再发起请求（给本地服务时间同步 token）
+- 验证：
+  - `curl -s http://localhost:7073/api/health` 应返回 `{"status":"ok"}`（仅代表服务运行）
+  - 紧接着调用 `curl -s http://localhost:7073/api/tts/voices/categories -H "Authorization: Bearer $AIVO_TOKEN"` 应返回 `code: 200`；若此处仍是 401，重复本步骤
+
+注意：手动 curl 时请为业务接口添加 `Authorization` 头；不要并发大量请求在登录切换的几秒内。
 
 ---
 
 ## 完整工作流
 
-### Step 1 — 确认服务状态
+### Step 1 — 服务与登录检查
 
 ```bash
 curl -s --connect-timeout 3 http://localhost:7073/api/health
 ```
 
-返回 `{"status":"ok"}` 表示正常。若连接失败，告知用户：**请先启动容剪客户端**。
+- 返回 `{"status":"ok"}` 表示服务可用；若连接失败，提示用户：请先启动容剪客户端
+- 紧接着验证登录态（防止“服务可用但未登录”的 401）：
+
+```bash
+# 如用 curl 排查，请携带 Authorization 头（将 <TOKEN> 替换为本地缓存中的 token）
+curl -s http://localhost:7073/api/tts/voices/categories \
+  -H "Authorization: Bearer $AIVO_TOKEN"
+```
+
+- 返回 `code: 200` 代表已登录
+- 返回 401 代表未登录或 token 失效：执行“Step 0 — 刷新登录状态”后再试
+- 说明：OpenClaw 内部会自动读取并附带 Authorization 头；仅在手工排查时需要你手动附加
 
 ---
 
@@ -74,10 +126,11 @@ curl -s --connect-timeout 3 http://localhost:7073/api/health
 #### 2a. 获取音色分类
 
 ```bash
-curl -s http://localhost:7073/api/tts/voices/categories
+curl -s http://localhost:7073/api/tts/voices/categories \
+  -H "Authorization: Bearer $AIVO_TOKEN"
 ```
 
-**返回示例：**
+返回示例：
 ```json
 {
   "code": 200,
@@ -91,15 +144,17 @@ curl -s http://localhost:7073/api/tts/voices/categories
 #### 2b. 获取音色列表（可按分类/语言/关键词过滤）
 
 ```bash
-curl -s "http://localhost:7073/api/tts/voices?category=通用&language=中文"
+curl -s "http://localhost:7073/api/tts/voices?category=通用&language=中文" \
+  -H "Authorization: Bearer $AIVO_TOKEN"
 ```
 
-**也可以搜索关键词：**
+也可以搜索关键词：
 ```bash
-curl -s "http://localhost:7073/api/tts/voices?keyword=甜美"
+curl -s "http://localhost:7073/api/tts/voices?keyword=甜美" \
+  -H "Authorization: Bearer $AIVO_TOKEN"
 ```
 
-**返回示例：**
+返回示例：
 ```json
 {
   "code": 200,
@@ -126,7 +181,7 @@ curl -s "http://localhost:7073/api/tts/voices?keyword=甜美"
 }
 ```
 
-**向用户展示可用音色列表，让用户选择想要使用的音色。** 展示时包含音色名称、性别、类别和描述。
+向用户展示可用音色列表，让用户选择想要使用的音色。展示时包含音色名称、性别、类别和描述。
 
 ---
 
@@ -173,7 +228,7 @@ JSON 文件格式：
 
 ### Step 4 — 用户选择音色
 
-**必须询问用户想要使用哪个音色进行合成。**
+必须询问用户想要使用哪个音色进行合成。
 
 展示方式：
 ```
@@ -192,7 +247,7 @@ JSON 文件格式：
 
 ### Step 5 — 创建合成任务
 
-> **⚠️ 请求格式非常重要，必须严格按照以下格式发送，否则合成会失败或生成错误的音频。**
+⚠️ 请求格式非常重要，必须严格按照以下格式发送，否则合成会失败或生成错误的音频。
 
 #### 方式 A：直接输入文本（手动模式）
 
@@ -200,6 +255,7 @@ JSON 文件格式：
 
 ```bash
 curl -s -X POST http://localhost:7073/api/tts/member/create \
+  -H "Authorization: Bearer $AIVO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "sourceType": "manual",
@@ -220,13 +276,13 @@ curl -s -X POST http://localhost:7073/api/tts/member/create \
   }'
 ```
 
-
 #### 方式 B：导入文案裂变结果（矩阵模式）
 
 当从文案裂变 JSON 文件导入时，使用 `sourceType: "copywriting"`，每个选中的版本构建一条 shot：
 
 ```bash
 curl -s -X POST http://localhost:7073/api/tts/member/create \
+  -H "Authorization: Bearer $AIVO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "sourceType": "copywriting",
@@ -253,12 +309,12 @@ curl -s -X POST http://localhost:7073/api/tts/member/create \
   }'
 ```
 
-**请求参数说明：**
+请求参数说明：
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | `sourceType` | string | 是 | `"manual"`（手动输入）或 `"copywriting"`（文案裂变导入） |
-| `shots` | array | 是 | 文本数组，每条包含 `content` 字段（**不是** `text`，**不是** `items`） |
+| `shots` | array | 是 | 文本数组，每条包含 `content` 字段（不是 `text`，不是 `items`） |
 | `shots[].content` | string | 是 | 要合成的文本内容 |
 | `shots[].id` | string | 否 | 分镜 ID（仅 copywriting 模式） |
 | `shots[].name` | string | 否 | 分镜名称（仅 copywriting 模式） |
@@ -270,9 +326,9 @@ curl -s -X POST http://localhost:7073/api/tts/member/create \
 | `audioFormat` | string | 是 | 音频格式，固定填 `"mp3"` |
 | `sampleRate` | int | 是 | 采样率，固定填 `24000` |
 
-**注意：** 不需要手动传 `Authorization` 头。Go 服务会自动使用当前登录用户的 token 进行认证（前提是用户已在容剪客户端登录）。如果返回"无效token"错误，提示用户先在容剪客户端登录账号。
+注意：手动 curl 必须传 `Authorization` 头（OpenClaw 会自动附带）。若返回 401 或“无效 token”，执行“Step 0 — 刷新登录状态”。
 
-**返回示例：**
+返回示例：
 ```json
 {
   "code": 200,
@@ -288,13 +344,14 @@ curl -s -X POST http://localhost:7073/api/tts/member/create \
 
 ### Step 6 — 轮询合成状态
 
-每 **3秒** 执行一次，使用 Step 5 返回的 `taskNo`：
+每 3 秒执行一次，使用 Step 5 返回的 `taskNo`：
 
 ```bash
-curl -s "http://localhost:7073/api/tts/task/status/tts_task_20260311_abc123"
+curl -s "http://localhost:7073/api/tts/task/status/tts_task_20260311_abc123" \
+  -H "Authorization: Bearer $AIVO_TOKEN"
 ```
 
-**任务状态码说明：**
+任务状态码说明：
 
 | taskStatus | 含义 |
 |------------|------|
@@ -304,7 +361,7 @@ curl -s "http://localhost:7073/api/tts/task/status/tts_task_20260311_abc123"
 | 3 | 部分失败 |
 | 4 | 全部失败 |
 
-**合成中返回（taskStatus = 0 或 1）：**
+合成中返回（taskStatus = 0 或 1）：
 ```json
 {
   "code": 200,
@@ -316,7 +373,7 @@ curl -s "http://localhost:7073/api/tts/task/status/tts_task_20260311_abc123"
 }
 ```
 
-**完成返回（taskStatus = 2）：**
+完成返回（taskStatus = 2）：
 ```json
 {
   "code": 200,
@@ -330,20 +387,21 @@ curl -s "http://localhost:7073/api/tts/task/status/tts_task_20260311_abc123"
 
 当 `taskStatus` 为 0 或 1 时继续轮询，当 `taskStatus >= 2` 时停止轮询。
 
-保存 `data.id`（数字类型，**不是** `taskNo`），Step 7 需要用 `id` 来下载。
+保存 `data.id`（数字类型，不是 `taskNo`），Step 7 需要用 `id` 来下载。
 
-向用户展示进度：`正在合成语音，请稍候...`
+向用户展示进度：正在合成语音，请稍候...
 
 ---
 
 ### Step 7 — 下载合成结果到本地（必须执行）
 
-> **此步骤不可跳过。** Step 6 完成后音频仅存在于远程服务器，必须调用 `save-to-folder` 接口才能将音频下载保存到用户的本地电脑。
+此步骤不可跳过。Step 6 完成后音频仅存在于远程服务器，必须调用 `save-to-folder` 接口才能将音频下载保存到用户的本地电脑。
 
 合成完成后（`taskStatus >= 2`），使用 Step 6 中获取的 `data.id`（数字类型）调用 `save-to-folder` 接口：
 
 ```bash
 curl -s -X POST http://localhost:7073/api/tts/member/save-to-folder \
+  -H "Authorization: Bearer $AIVO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "id": 12345,
@@ -351,14 +409,14 @@ curl -s -X POST http://localhost:7073/api/tts/member/save-to-folder \
   }'
 ```
 
-**参数说明：**
+参数说明：
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `id` | int | 是 | Step 6 轮询返回的 `data.id`（数字类型，**不是** `taskNo` 字符串） |
-| `destPath` | string | 是 | 本地保存目录。如果用户指定了路径则使用用户的路径；如果未指定，使用桌面路径（Windows: `%USERPROFILE%/Desktop`，macOS/Linux: `$HOME/Desktop`），**不要写死用户名** |
+| `id` | int | 是 | Step 6 轮询返回的 `data.id`（数字类型，不是 `taskNo` 字符串） |
+| `destPath` | string | 是 | 本地保存目录。如果用户指定了路径则使用用户的路径；如果未指定，使用桌面路径（Windows: `%USERPROFILE%/Desktop`，macOS/Linux: `$HOME/Desktop`），不要写死用户名 |
 
-**返回示例：**
+返回示例：
 ```json
 {
   "code": 200,
@@ -390,7 +448,7 @@ curl -s -X POST http://localhost:7073/api/tts/member/save-to-folder \
 告知用户：
 - 合成的音色名称
 - 合成的文本条数
-- **本地音频保存路径**：Step 7 的 `data.savedPath`
+- 本地音频保存路径：Step 7 的 `data.savedPath`
 
 ---
 
@@ -405,22 +463,25 @@ curl -s -X POST http://localhost:7073/api/tts/member/save-to-folder \
 | GET | `/api/tts/task/status/{taskNo}` | 查询任务状态 |
 | POST | `/api/tts/member/save-to-folder` | 下载音频到本地文件夹 |
 
+> 说明：除 `/api/health` 外，以上接口手动调用均需在请求头添加 `Authorization: Bearer $AIVO_TOKEN`。
+
 ---
 
 ## 错误处理
 
-> **重要：不要向用户展示原始的后端错误信息（如 IP 地址、端口号、内部服务名、日志路径等），应转换为用户友好的提示。**
+重要：不要向用户展示原始的后端错误信息（如 IP、端口、内部服务名、日志路径等），统一转换为用户友好的提示。
 
 | 错误情况 | 处理方式 |
 |----------|----------|
-| 服务连接失败 | 提示用户：**"容剪服务未启动，请先打开容剪客户端"** |
-| 获取音色列表失败 | 提示用户：**"语音合成服务暂时不可用，请检查网络连接并重试"** |
+| 服务连接失败 | 提示：容剪服务未启动，请先打开容剪客户端 |
+| 401 未登录/无效 token | 执行“Step 0 — 刷新登录状态”（完全退出 → 重新打开并登录 → 等待 3–5 秒 → 再试） |
+| 获取音色列表失败 | 提示：语音合成服务暂时不可用，请检查网络连接并重试 |
 | JSON 文件读取失败 | 检查文件路径是否正确，文件格式是否为有效 JSON |
 | 合成任务创建失败 | 检查文本内容是否为空，音色 ID 是否有效 |
-| `status: "failed"` | 提示用户：**"语音合成失败，请检查文本内容后重试"**，不要直接展示系统内部错误信息 |
+| status: "failed" | 提示：语音合成失败，请检查文本内容后重试 |
 | 下载保存失败 | 检查目标目录是否有写入权限 |
-| 合成超时（> 5分钟） | 文本过长时合成耗时较长，建议拆分为更小的文本段 |
-| 其他未知错误 | 提示用户：**"操作失败，请重试"**，不要暴露内部错误堆栈 |
+| 合成超时（> 5 分钟） | 文本过长时合成耗时较长，建议拆分为更小的文本段 |
+| 其他未知错误 | 提示：操作失败，请重试 |
 
 ---
 
@@ -429,7 +490,9 @@ curl -s -X POST http://localhost:7073/api/tts/member/save-to-folder \
 在用户选择音色前，可以让用户试听：
 
 ```bash
-curl -s "http://localhost:7073/api/tts/voices/preview/{voiceId}" --output preview.mp3
+curl -s "http://localhost:7073/api/tts/voices/preview/{voiceId}" \
+  -H "Authorization: Bearer $AIVO_TOKEN" \
+  --output preview.mp3
 ```
 
 这会下载一段音色试听音频（MP3 格式）。首次试听某个音色可能需要较长时间（最长 60 秒），因为需要进行实时合成。

@@ -132,11 +132,16 @@ curl -s -X POST http://localhost:7073/api/video-download \
 
 **关键字段：** 从 `data.download_url` 获取文件的相对下载路径（如 `/downloads/20260310/douyin/xxx.mp4`）。
 
-> **注意：** 如果响应中没有 `download_url` 字段但有 `local_file_path`，则从 `local_file_path` 中提取 `/downloads/` 之后的部分作为 `download_url`。例如 `local_file_path` 为 `/www/wwwroot/video-extractor/downloads/20260312/douyin/xxx.mp4`，则 `download_url` 为 `/downloads/20260312/douyin/xxx.mp4`。
+> **注意：** `data.download_url` 一定会存在（服务端已自动补充）。如果万一为空，可从 `data.local_file_path` 中提取 `/downloads/` 及之后的部分拼成 `download_url`。例如 `local_file_path` 为 `/www/wwwroot/video-extractor/downloads/20260312/douyin/xxx.mp4`，则 `download_url` 为 `/downloads/20260312/douyin/xxx.mp4`。
+
+> **⚠️ 重要：Step 2 只是在远程服务器上完成了下载，文件还不在用户本地！`local_file_path` 是远程服务器路径（不是用户电脑路径）。必须继续执行 Step 3 才能把视频保存到用户的本地磁盘。**
 
 ---
 
-### Step 3 — 下载视频到本地
+### Step 3 — 下载视频到本地（必须执行）
+
+> **此步骤不可跳过。** Step 2 完成后视频仅存在于远程服务器，必须调用 `save-to-local` 接口才能将视频下载保存到用户的本地电脑。
+
 
 使用 `save-to-local` 接口将视频下载到用户本地磁盘：
 
